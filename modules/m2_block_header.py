@@ -1,38 +1,41 @@
-"""Starter file for module M2."""
+import requests
+import hashlib
 
-import streamlit as st
+def get_latest_block_hash():
+    url = "https://blockstream.info/api/blocks/tip/hash"
+    return requests.get(url).text
 
-from api.blockchain_client import get_block
+def get_block_header(block_hash):
+    url = f"https://blockstream.info/api/block/{block_hash}"
+    return requests.get(url).json()
 
+def double_sha256(header_hex):
+    header_bytes = bytes.fromhex(header_hex)
+    hash1 = hashlib.sha256(header_bytes).digest()
+    hash2 = hashlib.sha256(hash1).digest()
+    return hash2.hex()
 
-def render() -> None:
-    """Render the M2 panel."""
-    st.header("M2 - Block Header Analyzer")
-    st.write("Use this module to inspect the fields of one block header.")
+def count_leading_zeros(hex_hash):
+    binary = bin(int(hex_hash, 16))[2:].zfill(256)
+    return len(binary) - len(binary.lstrip('0'))
 
-    block_hash = st.text_input(
-        "Block hash",
-        placeholder="Enter a block hash",
-        key="m2_hash",
-    )
+def run_m2():
+    block_hash = get_latest_block_hash()
+    block = get_block_header(block_hash)
 
-    if st.button("Look up block", key="m2_lookup") and block_hash:
-        with st.spinner("Fetching data..."):
-            try:
-                block = get_block(block_hash)
-                st.subheader("Block header fields")
-                header_fields = {
-                    "Hash": block.get("hash"),
-                    "Height": block.get("height"),
-                    "Time": block.get("time"),
-                    "Nonce": block.get("nonce"),
-                    "Bits": block.get("bits"),
-                    "Merkle root": block.get("mrkl_root"),
-                    "Previous block": block.get("prev_block"),
-                }
-                for label, value in header_fields.items():
-                    st.write(f"**{label}:** {value}")
-            except Exception as exc:
-                st.error(f"Error fetching block: {exc}")
-    elif not block_hash:
-        st.info("Enter a block hash and click Look up block.")
+    print("Block Hash:", block_hash)
+    print("Height:", block["height"])
+    print("Timestamp:", block["timestamp"])
+    print("Nonce:", block["nonce"])
+    print("Difficulty:", block["difficulty"])
+
+    # Simulación del header (simplificado)
+    header_hex = block_hash  # ⚠️ luego lo mejoramos
+
+    computed_hash = double_sha256(header_hex)
+
+    print("Computed Hash:", computed_hash)
+    print("Leading zeros:", count_leading_zeros(computed_hash))
+
+if __name__ == "__main__":
+    run_m2()
