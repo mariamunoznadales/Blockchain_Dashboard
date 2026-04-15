@@ -48,3 +48,18 @@ Write here if you are stuck with something.
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
+
+## Project Structure
+text
+template-blockchain-dashboard/
+|-- README.md
+|-- requirements.txt
+|-- .gitignore
+|-- app.py
+|-- api/
+|   `-- blockchain_client.py
+`-- modules/
+    |-- m1_pow_monitor.py
+    |-- m2_block_header.py
+    |-- m3_difficulty_history.py
+    `-- m4_ai_component.py
