@@ -43,12 +43,6 @@ Write the next small step you will do before the next class.
 Write here if you are stuck with something.
 
 
-## How to Run
-
-```bash
-pip install -r requirements.txt
-streamlit run app.py
-
 ## Project Structure
 text
 template-blockchain-dashboard/
