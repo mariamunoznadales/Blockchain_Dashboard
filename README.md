@@ -7,7 +7,7 @@ Update this README every week.
 
 | Field | Value |
 |---|---|
-| Student Name | Maria Muñoz Nadales |
+| Student Name | Maria MuÃ±oz Nadales |
 | GitHub Username | mariamunoznadales |
 | Project Title | Bitcoin Real-Time Cryptographic Dashboard |
 | Chosen AI Approach | Predictor |
@@ -57,3 +57,21 @@ template-blockchain-dashboard/
     |-- m2_block_header.py
     |-- m3_difficulty_history.py
     `-- m4_ai_component.py
+
+<!-- student-repo-auditor:teacher-feedback:start -->
+## Teacher Feedback
+
+### Kick-off Review
+
+Review time: 2026-04-16 09:59 CEST
+Status: Green
+
+Strength:
+- Your repository keeps the expected classroom structure.
+
+Improve now:
+- The kickoff evidence is strong and aligned with the session goals.
+
+Next step:
+- Keep building on this start and prepare the next milestone.
+<!-- student-repo-auditor:teacher-feedback:end -->
