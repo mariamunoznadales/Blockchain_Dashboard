@@ -7,7 +7,7 @@ Update this README every week.
 
 | Field | Value |
 |---|---|
-| Student Name | Maria MuÃ±oz Nadales |
+| Student Name | Maria Muñoz Nadales |
 | GitHub Username | mariamunoznadales |
 | Project Title | Bitcoin Real-Time Cryptographic Dashboard |
 | Chosen AI Approach | Predictor |
