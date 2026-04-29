@@ -67,15 +67,15 @@ template-blockchain-dashboard/
 
 ### Kick-off Review
 
-Review time: 2026-04-16 09:59 CEST
+Review time: 2026-04-29 20:44 CEST
 Status: Green
 
 Strength:
-- Your repository keeps the expected classroom structure.
+- M1 already shows visible progress beyond the initial template.
 
 Improve now:
-- The kickoff evidence is strong and aligned with the session goals.
+- I do not yet see a clear dashboard integration for M1, M2, M3, and M4 in app.py.
 
 Next step:
-- Keep building on this start and prepare the next milestone.
+- Make sure app.py visibly integrates M1, M2, M3, and M4 in the dashboard navigation.
 <!-- student-repo-auditor:teacher-feedback:end -->
