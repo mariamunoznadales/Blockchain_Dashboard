@@ -367,6 +367,82 @@ st.markdown(
         font-weight: inherit !important;
         opacity: 1 !important;
     }
+
+    .milestone-nav {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.8rem;
+        margin: 0.2rem auto 1.25rem auto;
+    }
+
+    .milestone-nav-card {
+        display: block;
+        min-height: 104px;
+        padding: 0.95rem 1rem;
+        border-radius: 18px;
+        border: 1px solid var(--accent-border-soft-light);
+        background:
+            radial-gradient(circle at top left, var(--accent-glow-soft), transparent 36%),
+            linear-gradient(180deg, rgba(17, 25, 40, 0.94), rgba(10, 16, 28, 0.90));
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.04),
+            0 18px 34px rgba(0, 0, 0, 0.18);
+        color: #C7D0DE !important;
+        text-decoration: none !important;
+        transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    .milestone-nav-card:hover {
+        transform: translateY(-2px);
+        border-color: var(--accent-border-strong);
+        background:
+            radial-gradient(circle at top left, var(--accent-glow-strong), transparent 42%),
+            linear-gradient(180deg, rgba(22, 34, 52, 0.98), rgba(11, 18, 30, 0.96));
+    }
+
+    .milestone-nav-number {
+        color: var(--accent-soft);
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+    }
+
+    .milestone-nav-title {
+        color: #F9FAFB;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-top: 0.35rem;
+        letter-spacing: -0.02em;
+    }
+
+    .milestone-nav-caption {
+        color: var(--muted);
+        font-size: 0.78rem;
+        line-height: 1.35;
+        margin-top: 0.3rem;
+    }
+
+    .milestone-anchor {
+        display: block;
+        position: relative;
+        top: -1rem;
+        visibility: hidden;
+    }
+
+    @media (max-width: 900px) {
+        .milestone-nav {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 560px) {
+        .milestone-nav {
+            grid-template-columns: 1fr;
+        }
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -522,17 +598,40 @@ mechanism_spec = adapter.mechanism_module()
 evolution_spec = adapter.evolution_module()
 forecast_spec = adapter.forecast_module()
 
+milestone_nav = [
+    ("m1", "M1", "Current State", state_spec.caption),
+    ("m2", "M2", "Verification Mechanism", mechanism_spec.caption),
+    ("m3", "M3", "Network Evolution", evolution_spec.caption),
+    ("m4", "M4", "Decision Outlook", forecast_spec.caption),
+]
+
+st.markdown(
+    '<div class="panel-label">Dashboard Navigation</div><div class="milestone-nav">'
+    + "".join(
+        f'<a class="milestone-nav-card" href="#{anchor}">'
+        f'<div class="milestone-nav-number">{number}</div>'
+        f'<div class="milestone-nav-title">{title}</div>'
+        f'<div class="milestone-nav-caption">{caption}</div>'
+        "</a>"
+        for anchor, number, title, caption in milestone_nav
+    )
+    + "</div>",
+    unsafe_allow_html=True,
+)
+
 top_left, top_right = st.columns(2)
 with top_left:
+    st.markdown('<span id="m1" class="milestone-anchor"></span>', unsafe_allow_html=True)
     st.markdown(
-        f'<div class="panel-label" style="color:{accent_soft};">{state_spec.panel_label}</div>',
+        f'<div class="panel-label" style="color:{accent_soft};">M1 | {state_spec.panel_label}</div>',
         unsafe_allow_html=True,
     )
     with st.container(key="module_shell_m1"):
         render_live_state()
 with top_right:
+    st.markdown('<span id="m2" class="milestone-anchor"></span>', unsafe_allow_html=True)
     st.markdown(
-        f'<div class="panel-label" style="color:{accent_soft};">{mechanism_spec.panel_label}</div>',
+        f'<div class="panel-label" style="color:{accent_soft};">M2 | {mechanism_spec.panel_label}</div>',
         unsafe_allow_html=True,
     )
     with st.container(key="module_shell_m2"):
@@ -540,15 +639,17 @@ with top_right:
 
 bottom_left, bottom_right = st.columns(2)
 with bottom_left:
+    st.markdown('<span id="m3" class="milestone-anchor"></span>', unsafe_allow_html=True)
     st.markdown(
-        f'<div class="panel-label" style="color:{accent_soft};">{evolution_spec.panel_label}</div>',
+        f'<div class="panel-label" style="color:{accent_soft};">M3 | {evolution_spec.panel_label}</div>',
         unsafe_allow_html=True,
     )
     with st.container(key="module_shell_m3"):
         render_live_evolution()
 with bottom_right:
+    st.markdown('<span id="m4" class="milestone-anchor"></span>', unsafe_allow_html=True)
     st.markdown(
-        f'<div class="panel-label" style="color:{accent_soft};">{forecast_spec.panel_label}</div>',
+        f'<div class="panel-label" style="color:{accent_soft};">M4 | {forecast_spec.panel_label}</div>',
         unsafe_allow_html=True,
     )
     with st.container(key="module_shell_m4"):
