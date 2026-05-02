@@ -81,5 +81,7 @@ Next step:
 
 
 FEEDBACK DONE. 2026-04-30
+M5-M7 DONE.
+M8 (INVENTED) DONE
 
 <!-- student-repo-auditor:teacher-feedback:end -->
