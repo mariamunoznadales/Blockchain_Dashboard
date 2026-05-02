@@ -97,7 +97,7 @@ def render() -> None:
         }
         st.session_state[state_key] = snapshot
 
-    st.subheader("Verification Mechanism")
+    st.subheader("Block Header Analyzer")
     st.caption("How the current block proves its validity.")
     try:
         block_hash = snapshot["hash"]

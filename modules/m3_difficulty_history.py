@@ -114,7 +114,7 @@ def render() -> None:
         }
         st.session_state[state_key] = snapshot
 
-    st.subheader("Network Evolution")
+    st.subheader("Difficulty History")
     st.caption("How difficulty is moving versus its recent history.")
 
     try:

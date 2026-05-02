@@ -16,6 +16,10 @@ from modules.m1_pow_monitor import render as render_m1
 from modules.m2_block_header import render as render_m2
 from modules.m3_difficulty_history import render as render_m3
 from modules.m4_ai_component import render as render_m4
+from modules.m5_merkle_proof import render as render_m5
+from modules.m6_security_score import render as render_m6
+from modules.m7_second_ai import render as render_m7
+from modules.m8_risk_radar import render_btc as render_m8
 
 
 IDENTITY = AssetIdentity(
@@ -71,6 +75,7 @@ class BtcAdapter:
     mechanism_renderer = staticmethod(render_m2)
     evolution_renderer = staticmethod(render_m3)
     forecast_renderer = staticmethod(render_m4)
+    optional_renderers = [render_m5, render_m6, render_m7, render_m8]
 
     def top_metrics(self) -> list[TopMetric]:
         try:
@@ -85,31 +90,55 @@ class BtcAdapter:
 
     def state_module(self) -> ModuleSpec:
         return ModuleSpec(
-            panel_label="State | Current Network State",
+            panel_label="Proof of Work Monitor",
             title="Proof of Work Monitor",
             caption="Live mining activity.",
         )
 
     def mechanism_module(self) -> ModuleSpec:
         return ModuleSpec(
-            panel_label="Mechanism | How The Block Is Verified",
-            title="Block Header",
+            panel_label="Block Header Analyzer",
+            title="Block Header Analyzer",
             caption="80-byte header decoded.",
         )
 
     def evolution_module(self) -> ModuleSpec:
         return ModuleSpec(
-            panel_label="Evolution | Difficulty Through Time",
+            panel_label="Difficulty History",
             title="Difficulty History",
             caption="Adjustments over time.",
         )
 
     def forecast_module(self) -> ModuleSpec:
         return ModuleSpec(
-            panel_label="Decision | What Comes Next",
-            title="AI Forecast",
+            panel_label="AI Component",
+            title="AI Component",
             caption="Next difficulty move.",
         )
+
+    def optional_modules(self) -> list[ModuleSpec]:
+        return [
+            ModuleSpec(
+                panel_label="Merkle Proof Verifier",
+                title="Merkle Proof Verifier",
+                caption="Transaction inclusion proof.",
+            ),
+            ModuleSpec(
+                panel_label="Security Score",
+                title="Security Score",
+                caption="51% attack economics.",
+            ),
+            ModuleSpec(
+                panel_label="Second AI approach",
+                title="Second AI approach",
+                caption="Model comparison.",
+            ),
+            ModuleSpec(
+                panel_label="Live Risk Radar",
+                title="Live Risk Radar",
+                caption="Five-factor network health.",
+            ),
+        ]
 
     def last_update(self) -> str:
         return datetime.now(UTC).strftime("%H:%M:%S UTC")

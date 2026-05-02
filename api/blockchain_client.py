@@ -171,6 +171,44 @@ def get_blockstream_block(block_hash: str) -> dict:
             return _cached_fallback(cache_key)
 
 
+@st.cache_data(ttl=300, show_spinner=False)
+def get_block_transaction_ids(block_hash: str) -> list[str]:
+    """Return transaction ids for a block in their displayed big-endian form."""
+    cache_key = f"block_txids:{block_hash}"
+    try:
+        data = _request_json(f"{BLOCKSTREAM_URL}/block/{block_hash}/txids", timeout=15)
+        return _remember(cache_key, data)
+    except Exception:
+        try:
+            raw_block = get_block(block_hash)
+            txids = [tx.get("hash") for tx in raw_block.get("tx", []) if tx.get("hash")]
+            return _remember(cache_key, txids)
+        except Exception:
+            return _cached_fallback(cache_key)
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def get_block_merkle_root(block_hash: str) -> str:
+    """Return the block Merkle root in displayed big-endian form."""
+    cache_key = f"block_merkle_root:{block_hash}"
+    try:
+        raw_block = get_block(block_hash)
+        merkle_root = raw_block.get("mrkl_root")
+        if merkle_root:
+            return _remember(cache_key, merkle_root)
+    except Exception:
+        pass
+
+    try:
+        block = _request_json(f"{BLOCKSTREAM_URL}/block/{block_hash}")
+        merkle_root = block.get("merkle_root")
+        if merkle_root:
+            return _remember(cache_key, merkle_root)
+        return _cached_fallback(cache_key)
+    except Exception:
+        return _cached_fallback(cache_key)
+
+
 @st.cache_data(ttl=60, show_spinner=False)
 def get_block_header_hex(block_hash: str) -> str:
     """Return the raw 80-byte block header for a specific block as hex."""
@@ -211,5 +249,17 @@ def get_difficulty_history(n_points: int = 100) -> list[dict]:
             params={"timespan": "1year", "format": "json", "sampled": "true"},
         )
         return _remember(cache_key, data.get("values", [])[-n_points:])
+    except Exception:
+        return _cached_fallback(cache_key)
+
+
+@st.cache_data(ttl=120, show_spinner=False)
+def get_btc_usd_price() -> float:
+    """Return the latest BTC/USD quote from blockchain.info."""
+    cache_key = "btc_usd_price"
+    try:
+        data = _request_json(f"{BLOCKCHAIN_INFO_URL}/ticker")
+        usd_price = float(data["USD"]["last"])
+        return _remember(cache_key, usd_price)
     except Exception:
         return _cached_fallback(cache_key)

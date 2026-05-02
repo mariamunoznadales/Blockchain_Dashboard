@@ -74,7 +74,7 @@ def render() -> None:
         }
         st.session_state[state_key] = snapshot
 
-    st.subheader("Current State")
+    st.subheader("Proof of Work Monitor")
     st.caption("What the Bitcoin network is doing right now.")
     try:
         latest_block = snapshot["latest_block"]

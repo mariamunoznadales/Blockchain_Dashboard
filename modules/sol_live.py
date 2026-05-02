@@ -51,7 +51,7 @@ def render_state() -> None:
     accent_glow = current_accent_glow(0.2)
     df = _performance_df(snapshot)
 
-    st.subheader("Current State")
+    st.subheader("Proof of Work Monitor")
     st.caption("What Solana is doing right now.")
 
     c1, c2, c3, c4 = st.columns(4)
@@ -116,7 +116,7 @@ def render_mechanism() -> None:
     latest_block = snapshot["latest_block"]
     tx_count = len(latest_block.get("transactions", []))
 
-    st.subheader("Slot Inspector")
+    st.subheader("Block Header Analyzer")
     st.caption("How the latest Solana slot is finalized.")
 
     c1, c2, c3, c4 = st.columns(4)
@@ -149,7 +149,7 @@ def render_evolution() -> None:
     accent_glow = current_accent_glow(0.18)
     df = _performance_df(snapshot)
 
-    st.subheader("TPS History")
+    st.subheader("Difficulty History")
     st.caption("How Solana throughput and slot timing are evolving.")
 
     avg_tps = df["TPS"].mean() if not df.empty else 0.0
@@ -205,7 +205,7 @@ def render_forecast() -> None:
     trend = "Increasing" if prediction > latest_tps else "Decreasing" if prediction < latest_tps else "Flat"
     confidence = "High" if snapshot["avg_skip_rate"] < 0.05 else "Medium" if snapshot["avg_skip_rate"] < 0.12 else "Low"
 
-    st.subheader("Performance Outlook")
+    st.subheader("AI Component")
     st.caption("What Solana throughput likely looks like next.")
 
     fig = go.Figure()

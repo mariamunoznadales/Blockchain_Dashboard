@@ -11,6 +11,12 @@ from modules.eth_live import (
     render_mechanism,
     render_state,
 )
+from modules.eth_advanced import (
+    render_m5,
+    render_m6,
+    render_m7,
+)
+from modules.m8_risk_radar import render_eth as render_m8
 
 
 @st.cache_data(ttl=30, show_spinner=False)
@@ -41,6 +47,7 @@ class EthAdapter:
     mechanism_renderer = staticmethod(render_mechanism)
     evolution_renderer = staticmethod(render_evolution)
     forecast_renderer = staticmethod(render_forecast)
+    optional_renderers = [render_m5, render_m6, render_m7, render_m8]
 
     def top_metrics(self) -> list[TopMetric]:
         try:
@@ -55,31 +62,55 @@ class EthAdapter:
 
     def state_module(self) -> ModuleSpec:
         return ModuleSpec(
-            panel_label="State | Current Network State",
-            title="Network Activity",
+            panel_label="Proof of Work Monitor",
+            title="Proof of Work Monitor",
             caption="Live Ethereum block demand.",
         )
 
     def mechanism_module(self) -> ModuleSpec:
         return ModuleSpec(
-            panel_label="Mechanism | How The Block Is Built",
-            title="Block Structure",
+            panel_label="Block Header Analyzer",
+            title="Block Header Analyzer",
             caption="Slot, gas and base fee breakdown.",
         )
 
     def evolution_module(self) -> ModuleSpec:
         return ModuleSpec(
-            panel_label="Evolution | Fees Through Time",
-            title="Base Fee History",
+            panel_label="Difficulty History",
+            title="Difficulty History",
             caption="EIP-1559 fee evolution.",
         )
 
     def forecast_module(self) -> ModuleSpec:
         return ModuleSpec(
-            panel_label="Decision | Congestion Outlook",
-            title="Gas Forecast",
+            panel_label="AI Component",
+            title="AI Component",
             caption="Next-block fee expectation.",
         )
+
+    def optional_modules(self) -> list[ModuleSpec]:
+        return [
+            ModuleSpec(
+                panel_label="Merkle Proof Verifier",
+                title="Merkle Proof Verifier",
+                caption="EIP-1559 fee rule check.",
+            ),
+            ModuleSpec(
+                panel_label="Security Score",
+                title="Security Score",
+                caption="PoS economic security estimate.",
+            ),
+            ModuleSpec(
+                panel_label="Second AI approach",
+                title="Second AI approach",
+                caption="Fee model comparison.",
+            ),
+            ModuleSpec(
+                panel_label="Live Risk Radar",
+                title="Live Risk Radar",
+                caption="Five-factor network health.",
+            ),
+        ]
 
     def warm_cache(self) -> None:
         latest_block_snapshot("ETH")

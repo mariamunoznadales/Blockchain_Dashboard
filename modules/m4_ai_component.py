@@ -306,7 +306,7 @@ def render() -> None:
         }
         st.session_state[state_key] = snapshot
 
-    st.subheader("Decision Outlook")
+    st.subheader("AI Component")
     st.caption("Live difficulty forecast model.")
 
     try:

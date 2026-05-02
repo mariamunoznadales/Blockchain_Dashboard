@@ -49,7 +49,7 @@ def render_state() -> None:
     accent = current_accent()
     accent_glow = current_accent_glow(0.2)
 
-    st.subheader("Current State")
+    st.subheader("Proof of Work Monitor")
     st.caption("What Ethereum is doing right now.")
 
     col1, col2, col3, col4 = st.columns(4)
@@ -118,7 +118,7 @@ def render_state() -> None:
 
 def render_mechanism() -> None:
     snapshot = _snapshot()
-    st.subheader("Block Structure")
+    st.subheader("Block Header Analyzer")
     st.caption("How the latest Ethereum block is assembled.")
 
     col1, col2, col3, col4 = st.columns(4)
@@ -165,7 +165,7 @@ def render_evolution() -> None:
     accent_glow = current_accent_glow(0.18)
     df = _build_fee_df(snapshot)
 
-    st.subheader("Base Fee History")
+    st.subheader("Difficulty History")
     st.caption("How Ethereum fees have evolved across recent blocks.")
 
     current_fee = df["base_fee_gwei"].iloc[-1]
@@ -227,7 +227,7 @@ def render_forecast() -> None:
     trend = "Increasing" if prediction > snapshot["base_fee_gwei"] else "Decreasing" if prediction < snapshot["base_fee_gwei"] else "Flat"
     confidence = "High" if abs(prediction - snapshot["next_base_fee_gwei"]) < 0.15 else "Medium" if abs(prediction - snapshot["next_base_fee_gwei"]) < 0.6 else "Low"
 
-    st.subheader("Gas Forecast")
+    st.subheader("AI Component")
     st.caption("What the next Ethereum block fee likely looks like.")
 
     fig = go.Figure()

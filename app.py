@@ -597,13 +597,24 @@ state_spec = adapter.state_module()
 mechanism_spec = adapter.mechanism_module()
 evolution_spec = adapter.evolution_module()
 forecast_spec = adapter.forecast_module()
+optional_specs = adapter.optional_modules() if hasattr(adapter, "optional_modules") else []
+optional_renderers = getattr(adapter, "optional_renderers", [])
 
 milestone_nav = [
-    ("m1", "M1", "Current State", state_spec.caption),
-    ("m2", "M2", "Verification Mechanism", mechanism_spec.caption),
-    ("m3", "M3", "Network Evolution", evolution_spec.caption),
-    ("m4", "M4", "Decision Outlook", forecast_spec.caption),
+    ("m1", "M1", state_spec.title, state_spec.caption),
+    ("m2", "M2", mechanism_spec.title, mechanism_spec.caption),
+    ("m3", "M3", evolution_spec.title, evolution_spec.caption),
+    ("m4", "M4", forecast_spec.title, forecast_spec.caption),
 ]
+milestone_nav.extend(
+    (
+        f"m{index + 5}",
+        f"M{index + 5}",
+        spec.title,
+        spec.caption,
+    )
+    for index, spec in enumerate(optional_specs)
+)
 
 st.markdown(
     '<div class="panel-label">Dashboard Navigation</div><div class="milestone-nav">'
@@ -654,3 +665,32 @@ with bottom_right:
     )
     with st.container(key="module_shell_m4"):
         render_live_forecast()
+
+if optional_specs:
+    st.markdown(
+        '<div class="panel-label" style="margin-top:1.2rem;">Advanced Modules</div>',
+        unsafe_allow_html=True,
+    )
+    for index in range(0, len(optional_specs), 2):
+        optional_cols = st.columns(2)
+        for offset, col in enumerate(optional_cols):
+            module_index = index + offset
+            if module_index >= len(optional_specs):
+                continue
+
+            spec = optional_specs[module_index]
+            renderer = optional_renderers[module_index] if module_index < len(optional_renderers) else None
+            module_number = module_index + 5
+
+            with col:
+                st.markdown(
+                    f'<span id="m{module_number}" class="milestone-anchor"></span>',
+                    unsafe_allow_html=True,
+                )
+                st.markdown(
+                    f'<div class="panel-label" style="color:{accent_soft};">'
+                    f'M{module_number} | {spec.panel_label}</div>',
+                    unsafe_allow_html=True,
+                )
+                with st.container(key=f"module_shell_m{module_number}"):
+                    _render_module(spec, renderer)
