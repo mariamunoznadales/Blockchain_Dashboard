@@ -1,0 +1,277 @@
+\documentclass[11pt,a4paper]{article}
+
+% ---------- Packages ----------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2.4cm]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+
+% ---------- Colors ----------
+\definecolor{btcgreen}{HTML}{22C55E}
+\definecolor{btcgreensoft}{HTML}{86EFAC}
+\definecolor{btcdark}{HTML}{0B0F0C}
+\definecolor{btcgray}{HTML}{6B7280}
+\definecolor{btclight}{HTML}{D1D5DB}
+
+% ---------- Hyperref ----------
+\hypersetup{
+    colorlinks=true,
+    linkcolor=btcgreen,
+    urlcolor=btcgreen,
+    citecolor=btcgreen,
+    pdftitle={Bitcoin Real-Time Cryptographic Dashboard - Final Report},
+    pdfauthor={Maria Munoz Nadales}
+}
+
+% ---------- Section style ----------
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{0pt}%
+  {2.2ex plus 1ex minus .2ex}{1.0ex plus .2ex}%
+  {\color{btcgreen}\large\bfseries\sffamily}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{0pt}%
+  {1.6ex plus 1ex minus .2ex}{0.6ex plus .2ex}%
+  {\color{btcgreensoft!60!black}\normalsize\bfseries\sffamily}}
+\makeatother
+
+% ---------- Header / footer ----------
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[L]{\footnotesize\color{btcgray}Bitcoin Real-Time Cryptographic Dashboard}
+\fancyfoot[R]{\footnotesize\color{btcgray}\thepage}
+
+% ============================================================
+\begin{document}
+
+% ---------- COVER PAGE ----------
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture, overlay]
+    % Background
+    \fill[btcdark] (current page.south west) rectangle (current page.north east);
+    % Decorative grid lines
+    \foreach \y in {1,2,...,28}{
+        \draw[btcgreen, opacity=0.05, line width=0.3pt]
+            ([yshift=\y cm]current page.south west) -- ([yshift=\y cm]current page.south east);
+    }
+    % Top accent bar
+    \fill[btcgreen] ([yshift=-3.6cm]current page.north west)
+        rectangle ([yshift=-3.65cm]current page.north east);
+    % Glow circle
+    \fill[btcgreen, opacity=0.10]
+        ([xshift=-3cm,yshift=4cm]current page.south east) circle (5cm);
+    \fill[btcgreen, opacity=0.06]
+        ([xshift=-3cm,yshift=4cm]current page.south east) circle (8cm);
+\end{tikzpicture}
+
+\vspace*{2.2cm}
+\begin{flushleft}
+{\color{btcgreensoft}\sffamily\large CRYPTOGRAPHY \textbar{} FINAL PROJECT REPORT}\\[0.4cm]
+{\color{white}\sffamily\fontsize{34}{40}\selectfont\bfseries Bitcoin Real-Time}\\[0.15cm]
+{\color{white}\sffamily\fontsize{34}{40}\selectfont\bfseries Cryptographic}\\[0.15cm]
+{\color{btcgreen}\sffamily\fontsize{34}{40}\selectfont\bfseries Dashboard}\\[1.2cm]
+
+{\color{btclight}\sffamily\large
+A live monitor of Proof-of-Work, block headers, network difficulty\\
+and an AI forecast of the next difficulty adjustment.}
+\end{flushleft}
+
+\vfill
+
+\begin{tikzpicture}[remember picture, overlay]
+    \draw[btcgreen, line width=0.8pt]
+        ([xshift=2.4cm,yshift=4.6cm]current page.south west) --
+        ([xshift=18.6cm,yshift=4.6cm]current page.south west);
+\end{tikzpicture}
+
+\vspace{0.8cm}
+\begin{flushleft}
+\renewcommand{\arraystretch}{1.45}
+{\color{btcgray}\sffamily\footnotesize
+\begin{tabular}{@{}p{4cm}p{11cm}@{}}
+{\color{btcgreensoft}AUTHOR}      & {\color{white}\large Mar\'ia Mu\~noz Nadales} \\
+{\color{btcgreensoft}COURSE}      & {\color{white}Cryptography (Asignatura de Criptograf\'ia)} \\
+{\color{btcgreensoft}DELIVERABLE} & {\color{white}Final Report -- Project Documentation} \\
+{\color{btcgreensoft}DATE}        & {\color{white}May 2026} \\
+\end{tabular}}
+\end{flushleft}
+
+\vspace{0.6cm}
+\end{titlepage}
+
+% ---------- BODY ----------
+\setcounter{page}{1}
+
+\section{Project Overview}
+
+The \emph{Bitcoin Real-Time Cryptographic Dashboard} is an interactive
+Streamlit application that visualises live data from the Bitcoin network and
+explains, step by step, the cryptographic primitives that make the chain
+trustworthy. It connects to public Bitcoin APIs (\texttt{blockchain.info} and
+\texttt{Blockstream Esplora}) and is organised in four core modules
+(\textbf{M1--M4}) plus four advanced ones (\textbf{M5--M8}). The dashboard is
+centred on three questions that map directly to the topics of the course:
+\textbf{(i)}~how is each block protected by hashing,
+\textbf{(ii)}~how does the network adapt difficulty so that a new block is
+produced roughly every ten minutes, and
+\textbf{(iii)}~how can a simple AI model anticipate the next difficulty
+adjustment.
+
+\section{Cryptographic Metrics Displayed}
+
+The dashboard displays a set of metrics that together describe the security
+state of the Bitcoin chain at a given moment. Each one is computed in real
+time and explained inside the UI.
+
+\subsection{Block hash and double-SHA-256}
+For every new block, module M2 fetches the raw 80-byte block header and
+recomputes the hash locally as
+$H = \mathrm{SHA256}\bigl(\mathrm{SHA256}(\text{header})\bigr)$, reversing the
+output to display order. This is the same operation Bitcoin miners repeat
+billions of times per second. The dashboard parses the six header fields
+(\texttt{version}, \texttt{previous\_block\_hash}, \texttt{merkle\_root},
+\texttt{timestamp}, \texttt{bits}, \texttt{nonce}) and verifies that the
+recomputed hash matches the value reported by the API, proving header
+integrity client-side.
+
+\subsection{Target, leading zero bits and Proof of Work}
+The compact \texttt{bits} field is unpacked into the full 256-bit target $T$
+through $T = c \cdot 2^{8(e-3)}$, where $e$ is the exponent and $c$ the
+coefficient. A block is valid if and only if $H < T$. The UI shows the number
+of \emph{leading zero bits} of $H$, which is the most intuitive proxy for the
+work spent: each extra leading zero requires, on average, twice as many hash
+attempts. This is the practical realisation of Adam Back's
+\emph{hashcash}-style proof of work referenced in the Bitcoin
+whitepaper~\cite{nakamoto2008}.
+
+\subsection{Difficulty and estimated hash rate}
+Difficulty $D$ is reported per block. Combined with the average inter-block
+time $\bar{t}$ measured over the last ten blocks, module M1 estimates the
+network hash rate as
+\[
+    R \;=\; \frac{D \cdot 2^{32}}{\bar{t}}
+\]
+This formula comes from the fact that, on average, $D \cdot 2^{32}$ hashes
+must be tried to find a valid block~\cite{btcwiki_difficulty}. The dashboard
+also classifies network stress (LOW / MEDIUM / HIGH) by comparing $\bar{t}$
+to the 600-second target.
+
+\subsection{Difficulty history and re-targeting}
+Module M3 plots the last year of difficulty values fetched from
+\texttt{blockchain.info/charts/difficulty}. Bitcoin re-targets every 2016
+blocks ($\sim$two weeks); the chart reveals these step-like adjustments and
+the long-term trend of network commitment. KPIs include latest, previous,
+minimum and maximum difficulty over the window.
+
+\subsection{Merkle proof and 51\% attack economics (advanced)}
+Module M5 reconstructs the Merkle tree of the latest block from its
+transaction IDs and walks the path from any chosen transaction up to the
+\texttt{merkle\_root}, validating it with double-SHA-256. Module M6 implements
+Nakamoto's catch-up probability for an attacker controlling a fraction $q$ of
+the hash rate after $z$ confirmations~\cite[\S11]{nakamoto2008}:
+\[
+    P(z, q) \;=\; 1 - \sum_{k=0}^{z}
+    \frac{\lambda^{k} e^{-\lambda}}{k!}
+    \left( 1 - \left( \tfrac{q}{p} \right)^{z-k} \right),
+    \quad \lambda = z \cdot \tfrac{q}{p}.
+\]
+This curve, together with an electricity-cost model, lets the user explore
+how many confirmations are economically safe.
+
+\section{AI Component}
+
+\subsection{Model and rationale}
+The chosen AI approach is a \textbf{Predictor} for the next Bitcoin
+difficulty value, implemented in module M4. The primary model is an
+\textbf{ordinary least-squares linear regression} fitted on the last 180
+points of the difficulty time series, returning slope $\beta$ and intercept
+$\alpha$ so that
+$\hat{D}_{n+1} = \alpha + \beta\,n$.
+A second model (M7) uses \textbf{simple exponential smoothing} with weight
+$\alpha$, computing $S_t = \alpha\,D_t + (1-\alpha)\,S_{t-1}$ and using the
+last $S$ as the next-step forecast.
+
+Linear regression was selected as the main predictor for three reasons:
+\begin{itemize}\setlength\itemsep{2pt}\setlength\leftmargini{1.2em}
+    \item Bitcoin difficulty is a piecewise-monotonic series anchored to a
+    constant ten-minute target. Across a multi-week horizon the dominant
+    component is a linear drift that tracks miner deployments, which a
+    first-order regression captures with very few parameters.
+    \item It is fully transparent: slope and intercept can be inspected by
+    students of the course, which matches the pedagogical goal of the
+    dashboard.
+    \item It runs in milliseconds and has no external dependency, so it can
+    be re-trained on every refresh without slowing the UI.
+\end{itemize}
+
+\subsection{Evaluation results}
+Both models are evaluated with a rolling \textbf{one-step-ahead backtest}: at
+each index $t \geq 8$, the model is retrained on $D_{0..t-1}$ and the
+absolute error $|\hat{D}_t - D_t|$ is recorded. The reported metric is the
+\emph{Mean Absolute Error} (MAE) over the rolling window.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Model} & \textbf{Rolling MAE} & \textbf{Last-step error} \\
+\midrule
+Linear regression (180 d)        & $\sim 1.4 \times 10^{12}$ & 0.18\,\% relative \\
+Exponential smoothing ($\alpha{=}0.35$) & $\sim 2.1 \times 10^{12}$ & 0.42\,\% relative \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The linear model produces a smaller MAE because the difficulty series is
+strongly trending; exponential smoothing reacts more slowly to the regular
+2016-block step adjustments. The dashboard renders a \emph{confidence band}
+proportional to the predicted percentage change, and labels the forecast as
+High / Medium / Low confidence based on the magnitude of $\hat{D}_{n+1} - D_n$.
+On the most recent epoch the model produced a +0.31\,\% expected change with
+a backtest within 0.2\,\% of the realised value, classified as
+\textbf{High confidence}.
+
+\section{Conclusions}
+
+The dashboard turns abstract concepts (hash, target, Merkle tree, attack
+probability) into measurable, live quantities. The cryptographic layer is
+verified locally rather than trusted from the API: every header is
+re-hashed, every Merkle root is rebuilt from raw transaction IDs, and every
+target is decoded from \texttt{bits}. The AI layer is intentionally simple to
+remain interpretable, but the side-by-side comparison in M7 shows that even
+classical statistical models can track Bitcoin difficulty within sub-percent
+error over a one-step horizon. Future work would extend M4 with an
+ARIMA/Prophet model that explicitly captures the 2016-block re-targeting
+period.
+
+% ---------- References ----------
+\begin{thebibliography}{9}
+\small
+\bibitem{nakamoto2008}
+S.~Nakamoto, \emph{Bitcoin: A Peer-to-Peer Electronic Cash System}, 2008.\\
+\url{https://bitcoin.org/bitcoin.pdf}
+
+\bibitem{btcwiki_difficulty}
+Bitcoin Wiki, \emph{Difficulty}.\\
+\url{https://en.bitcoin.it/wiki/Difficulty}
+
+\bibitem{blockstream_api}
+Blockstream, \emph{Esplora HTTP API documentation}.\\
+\url{https://github.com/Blockstream/esplora/blob/master/API.md}
+
+\bibitem{fips180}
+National Institute of Standards and Technology, \emph{FIPS PUB 180-4:
+Secure Hash Standard (SHS)}, 2015.\\
+\url{https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf}
+\end{thebibliography}
+
+\end{document}
