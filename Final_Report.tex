@@ -14,6 +14,7 @@
 \usepackage{booktabs}
 \usepackage{fancyhdr}
 \usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
 
 % ---------- Colors ----------
 \definecolor{btcgreen}{HTML}{22C55E}
@@ -51,6 +52,7 @@
 
 % ============================================================
 \begin{document}
+\pagenumbering{gobble}
 
 % ---------- COVER PAGE ----------
 \begin{titlepage}
@@ -99,7 +101,7 @@ and an AI forecast of the next difficulty adjustment.}
 {\color{btcgray}\sffamily\footnotesize
 \begin{tabular}{@{}p{4cm}p{11cm}@{}}
 {\color{btcgreensoft}AUTHOR}      & {\color{white}\large Mar\'ia Mu\~noz Nadales} \\
-{\color{btcgreensoft}COURSE}      & {\color{white}Cryptography (Asignatura de Criptograf\'ia)} \\
+{\color{btcgreensoft}COURSE}      & {\color{white}Cryptography} \\
 {\color{btcgreensoft}DELIVERABLE} & {\color{white}Final Report -- Project Documentation} \\
 {\color{btcgreensoft}DATE}        & {\color{white}May 2026} \\
 \end{tabular}}
@@ -109,7 +111,7 @@ and an AI forecast of the next difficulty adjustment.}
 \end{titlepage}
 
 % ---------- BODY ----------
-\setcounter{page}{1}
+\pagenumbering{arabic}
 
 \section{Project Overview}
 
@@ -125,6 +127,22 @@ centred on three questions that map directly to the topics of the course:
 produced roughly every ten minutes, and
 \textbf{(iii)}~how can a simple AI model anticipate the next difficulty
 adjustment.
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}p{2.2cm}p{5.2cm}p{6.2cm}@{}}
+\toprule
+\textbf{Module} & \textbf{Displayed evidence} & \textbf{Cryptographic meaning} \\
+\midrule
+M1 & Difficulty, block time, hash-rate estimate & Measures the amount of work securing the current chain tip. \\
+M2 & Header fields, target, nonce, hash validation & Verifies Proof of Work locally from the 80-byte block header. \\
+M3 & Historical difficulty and recent trend & Shows how Bitcoin retargets mining cost over time. \\
+M4/M7 & Difficulty forecast and backtest MAE & Evaluates a predictor for the next difficulty point. \\
+M5/M6 & Merkle proof and attack probability & Connects transaction integrity with confirmation security. \\
+\bottomrule
+\end{tabular}
+\end{center}
 
 \section{Cryptographic Metrics Displayed}
 
@@ -146,7 +164,8 @@ integrity client-side.
 \subsection{Target, leading zero bits and Proof of Work}
 The compact \texttt{bits} field is unpacked into the full 256-bit target $T$
 through $T = c \cdot 2^{8(e-3)}$, where $e$ is the exponent and $c$ the
-coefficient. A block is valid if and only if $H < T$. The UI shows the number
+coefficient. A block is valid when the hash interpreted as an integer satisfies
+$H \leq T$. The UI shows the number
 of \emph{leading zero bits} of $H$, which is the most intuitive proxy for the
 work spent: each extra leading zero requires, on average, twice as many hash
 attempts. This is the practical realisation of Adam Back's
@@ -161,16 +180,17 @@ network hash rate as
     R \;=\; \frac{D \cdot 2^{32}}{\bar{t}}
 \]
 This formula comes from the fact that, on average, $D \cdot 2^{32}$ hashes
-must be tried to find a valid block~\cite{btcwiki_difficulty}. The dashboard
+must be tried to find a valid block. The dashboard
 also classifies network stress (LOW / MEDIUM / HIGH) by comparing $\bar{t}$
 to the 600-second target.
 
 \subsection{Difficulty history and re-targeting}
-Module M3 plots the last year of difficulty values fetched from
-\texttt{blockchain.info/charts/difficulty}. Bitcoin re-targets every 2016
-blocks ($\sim$two weeks); the chart reveals these step-like adjustments and
-the long-term trend of network commitment. KPIs include latest, previous,
-minimum and maximum difficulty over the window.
+Module M3 requests the public \texttt{blockchain.info/charts/difficulty}
+series and displays the last 180 sampled difficulty points used by the
+dashboard. Bitcoin re-targets every 2016 blocks ($\sim$two weeks); the chart
+reveals these step-like adjustments and the medium-term trend of network
+commitment. KPIs include latest, previous, minimum and maximum difficulty over
+the selected window.
 
 \subsection{Merkle proof and 51\% attack economics (advanced)}
 Module M5 reconstructs the Merkle tree of the latest block from its
@@ -192,26 +212,44 @@ how many confirmations are economically safe.
 \subsection{Model and rationale}
 The chosen AI approach is a \textbf{Predictor} for the next Bitcoin
 difficulty value, implemented in module M4. The primary model is an
-\textbf{ordinary least-squares linear regression} fitted on the last 180
-points of the difficulty time series, returning slope $\beta$ and intercept
+\textbf{ordinary least-squares linear regression} fitted on the same last 180
+sampled difficulty points used by the dashboard, returning slope $\beta$ and intercept
 $\alpha$ so that
 $\hat{D}_{n+1} = \alpha + \beta\,n$.
 A second model (M7) uses \textbf{simple exponential smoothing} with weight
 $\alpha$, computing $S_t = \alpha\,D_t + (1-\alpha)\,S_{t-1}$ and using the
 last $S$ as the next-step forecast.
 
-Linear regression was selected as the main predictor for three reasons:
+Linear regression was selected as the main predictor for three practical
+reasons:
 \begin{itemize}\setlength\itemsep{2pt}\setlength\leftmargini{1.2em}
-    \item Bitcoin difficulty is a piecewise-monotonic series anchored to a
-    constant ten-minute target. Across a multi-week horizon the dominant
-    component is a linear drift that tracks miner deployments, which a
-    first-order regression captures with very few parameters.
+    \item Bitcoin difficulty changes in visible retargeting steps but often
+    has a clear medium-term direction; a first-order trend is a transparent
+    approximation of that direction.
     \item It is fully transparent: slope and intercept can be inspected by
     students of the course, which matches the pedagogical goal of the
     dashboard.
     \item It runs in milliseconds and has no external dependency, so it can
     be re-trained on every refresh without slowing the UI.
 \end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+    node distance=0.95cm,
+    box/.style={draw=btcgreen!65, rounded corners=2pt, align=center,
+                text width=3.0cm, minimum height=0.82cm,
+                fill=btcgreen!6, font=\small\sffamily},
+    arrow/.style={-{Latex[length=2mm]}, btcgreen!70, line width=0.7pt}
+]
+\node[box] (api) {Difficulty API\\180 samples};
+\node[box, right=of api] (clean) {Normalize\\date/value series};
+\node[box, right=of clean] (model) {Fit predictor\\linear + smoothing};
+\node[box, right=of model] (eval) {Backtest\\MAE + forecast};
+\draw[arrow] (api) -- (clean);
+\draw[arrow] (clean) -- (model);
+\draw[arrow] (model) -- (eval);
+\end{tikzpicture}
+\end{center}
 
 \subsection{Evaluation results}
 Both models are evaluated with a rolling \textbf{one-step-ahead backtest}: at
@@ -225,20 +263,21 @@ absolute error $|\hat{D}_t - D_t|$ is recorded. The reported metric is the
 \toprule
 \textbf{Model} & \textbf{Rolling MAE} & \textbf{Last-step error} \\
 \midrule
-Linear regression (180 d)        & $\sim 1.4 \times 10^{12}$ & 0.18\,\% relative \\
-Exponential smoothing ($\alpha{=}0.35$) & $\sim 2.1 \times 10^{12}$ & 0.42\,\% relative \\
+Linear regression (180 samples)        & $3.66 \times 10^{12}$ & 0.56\,\% relative \\
+Exponential smoothing ($\alpha{=}0.35$) & $1.18 \times 10^{12}$ & 0.44\,\% relative \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-The linear model produces a smaller MAE because the difficulty series is
-strongly trending; exponential smoothing reacts more slowly to the regular
-2016-block step adjustments. The dashboard renders a \emph{confidence band}
-proportional to the predicted percentage change, and labels the forecast as
-High / Medium / Low confidence based on the magnitude of $\hat{D}_{n+1} - D_n$.
-On the most recent epoch the model produced a +0.31\,\% expected change with
-a backtest within 0.2\,\% of the realised value, classified as
-\textbf{High confidence}.
+These values were computed from the live dataset on 7 May 2026. In that run,
+exponential smoothing achieved the lower rolling MAE because it follows recent
+retargeting steps more closely. Linear regression remains the main M4 model
+because it makes the trend direction explicit and is easier to explain in a
+cryptography dashboard; M7 is included to show the trade-off and avoid relying
+on a single untested predictor. The dashboard renders a \emph{confidence band}
+proportional to the predicted percentage change and labels the forecast as
+High / Medium / Low confidence based on the magnitude of
+$\hat{D}_{n+1} - D_n$.
 
 \section{Conclusions}
 
@@ -247,10 +286,10 @@ probability) into measurable, live quantities. The cryptographic layer is
 verified locally rather than trusted from the API: every header is
 re-hashed, every Merkle root is rebuilt from raw transaction IDs, and every
 target is decoded from \texttt{bits}. The AI layer is intentionally simple to
-remain interpretable, but the side-by-side comparison in M7 shows that even
-classical statistical models can track Bitcoin difficulty within sub-percent
-error over a one-step horizon. Future work would extend M4 with an
-ARIMA/Prophet model that explicitly captures the 2016-block re-targeting
+remain interpretable, while the side-by-side comparison in M7 shows that model
+choice matters and must be evaluated rather than assumed. Future work would
+promote the lower-error model when it consistently wins and test an
+ARIMA/Prophet variant that explicitly captures the 2016-block re-targeting
 period.
 
 % ---------- References ----------
@@ -259,19 +298,6 @@ period.
 \bibitem{nakamoto2008}
 S.~Nakamoto, \emph{Bitcoin: A Peer-to-Peer Electronic Cash System}, 2008.\\
 \url{https://bitcoin.org/bitcoin.pdf}
-
-\bibitem{btcwiki_difficulty}
-Bitcoin Wiki, \emph{Difficulty}.\\
-\url{https://en.bitcoin.it/wiki/Difficulty}
-
-\bibitem{blockstream_api}
-Blockstream, \emph{Esplora HTTP API documentation}.\\
-\url{https://github.com/Blockstream/esplora/blob/master/API.md}
-
-\bibitem{fips180}
-National Institute of Standards and Technology, \emph{FIPS PUB 180-4:
-Secure Hash Standard (SHS)}, 2015.\\
-\url{https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf}
 \end{thebibliography}
 
 \end{document}
